@@ -9,6 +9,12 @@ date:
 # pdftk A=inria-curryhoward.pdf B=prezentacja.pdf cat B1-7 A8-15 output out.pdf
 ---
 
+<!-- TODO:
+przedstawic:
+replacement: for phi(x,n): function, x:set,
+then {y | exists x phi(x, y)} is also a set
+comprehension: {x | phi(x)} is a set -->
+
 # Choice of proof assistant
 >- Suppose you have just proved a theorem and would like to formalize it
 >- In which system should you do it? In Rocq? In Isabelle? Maybe Mizar?
@@ -19,7 +25,7 @@ date:
 >- Crucial criterion: if you took the logic of a specific prover, could you prove your theorem in this logic?
 >- If your theorem prover is based on intuitionistic logic, you might not prove a classical theorem
 >- Specifically: in Lean, you will not prove that for every predicate $P$, $P \lor \lnot P$ holds.
->- (Lean is expressive enough to understand the second-order sentence $\forall P, P \lor \lnot P$ and take is as an axiom, so you can use it without proving)
+>- (Lean is expressive enough to understand the second-order sentence $\forall P. P \lor \lnot P$ and take is as an axiom, so you can use it without proving)
 >- Beware: these logics are not simple!
 
 # Let's consider a game
@@ -38,28 +44,31 @@ date:
 >- Prove that $\mathbb{N} - B_1$ is not empty
 >- Prove that for any suffix, Bob's sequence won't be winning
 
+# Language and logic of set theory
+>- The language consists of:
+>- A countably-infinite amount of variables $x_1, x_2, ...$ used for representing sets
+>- Logical symbols $\lnot, \land, \lor, \forall, \exists, =, \in, ()$
+
+# Set theory as a graph
+![alt text](image-3.png){ width=80% }
+
 # ZFC: Zermelo-Fraenkel axioms of set theory + choice (1922)
->- Extensionality
->- Unordered Pair
->- Specification (Comprehension)
+>- Empty set (?)
 >- Sum Set
 >- Power Set
 >- Infinity
->- Replacement (*)
+>- Unordered Pair
+
+. . .
+
+>- Extensionality
 >- Regularity
+
+. . .
+
+>- Specification (Comprehension)
+>- Replacement (*)
 >- Choice (**)
-
-# Axiom of Extensionality
-Two sets are equal if and only if they contain exactly the same members.
-$\forall u(u \in X \iff u \in Y) \implies X = Y$
-
-# Axiom of the Unordered Pair
-Given any two sets, we can form a new set containing precisely those two sets.
-$\forall a \forall b \exists c \forall x(x \in c \iff (x = a \lor x = b))$
-
-# Axiom of Specification (Separation / Comprehension)
-We can form a subset of an existing set consisting of all elements that satisfy a given property.
-$\forall X \forall p \exists Y \forall u(u \in Y \iff (u \in X \land \phi(u,p)))$
 
 # Axiom of the Sum Set (Union)
 Given a collection of sets (which is itself a set), we can form a new set containing all the elements that belong to at least one set in the collection.
@@ -73,44 +82,61 @@ $\forall X \exists Y \forall u(u \in Y \iff u \subseteq X)$
 This axiom postulates the existence of at least one set with infinitely many elements. A common example is the set of natural numbers (or a set that can be put into one-to-one correspondence with it).
 $\exists S [\emptyset \in S \land (\forall x \in S) [x \cup \{x\} \in S]]$
 
-# Axiom of Replacement
-If F is a function, then for any X there exists a set $\{F(x):x \in X\}$
-$(\forall x \forall y \forall z [\phi(x,y,p) \land \phi(x,z,p) \implies y = z]) \implies (\forall X \exists Y \forall y [y \in Y \iff (\exists x \in X) \phi(x,y,p)])$
+# Axiom of the Unordered Pair
+Given any two sets, we can form a new set containing precisely those two sets.
+$\forall a \forall b \exists c \forall x(x \in c \iff (x = a \lor x = b))$
+
+# Axiom of Extensionality
+Two sets are equal if and only if they contain exactly the same members.
+$\forall u(u \in X \iff u \in Y) \implies X = Y$
 
 # Axiom of Foundation (Regularity)
 This axiom prevents the existence of infinite descending chains of set membership; every nonempty set has an $\in$-minimal element.
 $\forall S [S \neq \emptyset \implies (\exists x \in S) [S \cap x = \emptyset]]$
 
+# Axiom of Specification (Separation / Comprehension)
+>- We can form a subset of an existing set consisting of all elements that satisfy a given property. Note that we can only take a subset and not form arbitrary sets - the latter leads to Russel's paradox.
+>- $\forall X \forall p \exists Y \forall u(u \in Y \iff (u \in X \land \phi(u,p)))$
+
+# Axiom of Replacement
+>- If F is a function, then for any X there exists a set $\{F(x):x \in X\}$
+>- $\forall p (\forall x \forall y \forall z [\phi(x,y,p) \land \phi(x,z,p) \implies y = z]) \implies (\forall X \exists Y \forall y [y \in Y \iff (\exists x \in X) \phi(x,y,p)])$
+
 # Axiom of Choice
-Given any collection of non-empty sets, it is possible to select one element from each set, even if the collection is infinite and there is no specific rule for making the selection.
-$\forall x \in a \exists y A(x,y) \implies \exists f \forall x \in a A(x, f(x))$
+>- Given any family of non-empty sets, there exists a **function** which selects precisely one element from every member of the family
+>- $\forall x \in a \exists y A(x,y) \implies \exists f \forall x \in a A(x, f(x))$
 
 # {N, P(N), P(P(N)), ...}
 >- This set is not definable in Zermelo set theory, i.e. ZF without the axiom schema of replacement!
->- Will we not run into troubles while proving statements about more complicted winning sets in our game?
+>- Will we not run into troubles while proving statements about more complicated winning sets in our game?
 
-# Gale-Stewart
->- A Gale-Stewart game is a pair $G = (T, P)$, where T is a nonempty pruned tree (without leaves) and $P \subseteq [T]$ is the winning set.
->- Discrete topology on $\mathbb{N}$: the topology where every subset of $\mathbb{N}$ is open.
->- When we say 'open game', 'closed game', 'Borel game' we only consider e.g. openness of [T] in $\mathbb{N}^\mathbb{N}$ with the product topology
+# Gale-Stewart game
+>- A Gale-Stewart game is a game like above. For simplicity, say that Alice and Bob choose elements from $\{0, 1\}$, so that they construct a sequence from $\{0, 1\}^\omega$. Denote the winning set as $P \subseteq \{0, 1\}^\omega$.
+>- Discrete topology on $\{0, 1\}$: the topology where every subset is open.
+>- $\{0, 1\}^\omega$: an infinite product of topological spaces. What is the topology? On the next slide!
+>- When we say 'open game', 'closed game', 'Borel game' we only consider e.g. openness of $P$ in $\{0, 1\}^\omega$ with the product topology
 
-# Box topology
-- The topology on $\prod_{\alpha \in J} X_\alpha$ with basis $\prod_{\alpha \in J} U_\alpha$, where each $U_\alpha$ is open in $X_\alpha$.
+<!-- # Box topology
+- The topology on $\prod_{\alpha \in J} X_\alpha$ with basis $\prod_{\alpha \in J} U_\alpha$, where each $U_\alpha$ is open in $X_\alpha$. -->
 
 # Product topology
 >- The topology on $\prod_{\alpha \in J} X_\alpha$ with basis $\prod_{\alpha \in J} U_\alpha$, where each $U_\alpha$ is open in $X_\alpha$ and all but finitely many $U_\alpha = X_\alpha$.
->- The key difference is that the box topology allows infinitely many factors in the basis element to be proper open subsets, while the product topology requires all but finitely many to be the entire space.
+>- Any open set in this topology can be expressed as a union of some family of elements from the basis
+>- Intuitively, an open set in the product topology is such that it only specifies a finite number of conditions on coordinates
+<!-- >- The key difference is that the box topology allows infinitely many factors in the basis element to be proper open subsets, while the product topology requires all but finitely many to be the entire space. -->
 
 # Intuition
->- In an open game, if Player I is going to win, they will win after a finite number of moves. There will be a point in the game where, no matter what Player II does afterwards, the resulting infinite play will be in Player I's winning set. Player I's victory becomes guaranteed at some finite stage.
+<!-- >- In an open game, if Player I is going to win, they will win after a finite number of moves. There will be a point in the game where, no matter what Player II does afterwards, the resulting infinite play will be in Player I's winning set. Player I's victory becomes guaranteed at some finite stage. -->
 >- In a closed game, if Player II is going to win (meaning the play will *not* be in Player I's winning set $P$), they will win after a finite number of moves. There will be a point in the game where, no matter what Player I does afterwards, the resulting infinite play will *not* be in Player I's winning set. Player II's victory (Player I's loss) becomes guaranteed at some finite stage.
+>- If Player II doesn't win after any finite number of steps, then necessarily, Player I wins.
+<!-- >- TODO: In formal verification, such conditions are called 'safety' conditions. -->
 
-# Is the game determined when the winning set is closed? (Kechris)
->- Consider a game $G(T, P)$ where Player I wins if the play is in $P$, for $P$ closed.
+# Is the game determined when the winning set is closed? (Gale-Stewart)
+>- Consider a game where Player I wins if the play is in $P$, for $P$ closed.
 >- If Player II has a winning strategy, the game is determined.
 >- Assume Player II does not have a winning strategy. We will show Player I has one.
->- A position $p = (a_0, a_1, ..., a_{2n-1}) \in T$ (with I to play next) is "not losing for I" if Player II does not have a winning strategy from that position.
->- I.e. II has no winning strategy in the game $G(T|_p, P|_p)$, where $T|_p = \{s \mid ps \in T\}$ , and $P|_p = \{y \mid py \in P\}$. So $\varphi$ is not losing for I.
+>- A position $p = (a_0, a_1, ..., a_{2n-1}) \in \{0, 1\}^*$ (with I to play next) is "not losing for I" if Player II does not have a winning strategy from that position.
+>- I.e. II has no winning strategy in the game on $P|_p$, where $P|_p = p^{-1} P = \{y \mid py \in P\}$. So $\varphi$ is not losing for I.
 
 # Crucial observation
 >- Suppose position $p = (a_0, ..., a_{2n-1})$ is not losing for Player I
@@ -123,16 +149,16 @@ $\forall x \in a \exists y A(x,y) \implies \exists f \forall x \in a A(x, f(x))$
 
 # Remark: neighbourhoods
 >- Suppose $(a_n) = (a_0, a_1, ...) \in W$, for $W$ open.
->- Then there exists a neighbourhood $N$ around $(a_n)$, contained in $W$.
->- There is a $k$ such that $N_{(a_0, ... ,a_{2k-1})} \cap [T] \subseteq W$
+>- Then there exists a neighbourhood $N$ around $(a_n)$, contained in $W$ -- a neighbourhood contained in the winning set is just a node in the game tree such that the whole subtree is winning for Alice.
+>- There is a $k$ such that $(a_0, ... , a_{2k-1}) * \{0,1\}^\omega \subseteq W$
 
 # Winning Argument for Player I
 >- We claim this strategy is winning for Player I.
 >- Consider a run $(a_0, a_1, ...)$ of the game in which Player I followed the strategy.
 >- Then, forall $n$, $(a_0, ... a_{2n-1})$ is not losing for Player I.
->- Since $P$ is closed in $[T]$, $P^c is open.
+>- Since $P$ is closed, $P^c$ is open in $\{0, 1\}^\omega$.
 >- Suppose that $(a_0, ...) \notin P$.
->- There exists $k$ such that the neighborhood $N(a_0, ..., a_{2k-1}) \cap [T] \subseteq P^c$.
+>- Then there exists $k$ such that the neighborhood $(a_0, ..., a_{2k-1})\{0, 1\}^\omega \subseteq P^c$.
 
 # Winning Argument for Player I
 >- But this means that any suffix after $(a_0, ..., a_{2k-1})$ leads to winning, i.e. Player II has a trivial winning strategy!
@@ -141,12 +167,20 @@ $\forall x \in a \exists y A(x,y) \implies \exists f \forall x \in a A(x, f(x))$
 >- Therefore, the assumption that $(a_0, ...) \notin P$ must be false
 >- So Player I wins.
 
+<!-- 
 # Remarks on Axiom of Choice (from Kechris)
 
->- Theorem 20.1 (Determinacy of Open/Closed Games) generally requires the **Axiom of Choice** due to the single-valuedness condition in the definition of a strategy. A strategy specifies a unique move for each possible history.
+>- Theorem 20.1 (Determinacy of Open/Closed Games) generally requires the **Axiom of Choice** due to the single-valuedness condition in the definition of a strategy. A strategy specifies a unique move for each possible history. -->
+
+# Remark: how to define more sets?
+>- An idea: Borel sets!
+>- First, take all the open sets and say they are all Borel.
+>- Take any two Borel sets $A, B$. Their relative complement $B \setminus A$ is also Borel.
+>- Take any countably many sets $A_i$. Their union and intersection is also Borel.
+>- Iterate these operations transfinitely. The result is the **Borel $\sigma$-algebra**.
 
 # Is the game determined when the winning set is Borel?
->- This is much more difficult!
+>- This is much more difficult, took many years and intermediate results to go from open/closed determinacy to Borel determinacy
 >- Harvey Friedman showed that determinacy for Gale-Stewart games where the winning set is only Borel, is not provable in ZF without the axiom schema of replacement!
 >- But will we be able to prove it in Lean 4?
 
@@ -158,53 +192,76 @@ $\forall x \in a \exists y A(x,y) \implies \exists f \forall x \in a A(x, f(x))$
 >- The type of all real numbers $\mathbb{R}$ is a type, so $\mathbb{R}$ lives at the middle level, and real numbers like 7 are terms; we write $7 : \mathbb{R}$ to indicate that 7 is a real number.
 
 # ZFC version used in Lean 4: infinite hierarchy of universes
-
 >- `Type` is the type of (small) types.
 >- it leads to paradoxes to set the type of `Type` to be also `Type`
 >- the type of `Type` is `Type 1`, etc.
 
+# Lean 4: inductive types
+Type of binary trees over a type $a$ in universe $u$:
+```lean4
+inductive Tree. {u} (a : Type u) : Type u
+  | nil : Tree a
+  | node : a → Tree a → Tree a → Tree a
+```
+
 # ZFC version used in Lean 4: pre-sets
-Set some specific universe `u`. Define a notion of **pre-set** inductively:
+A pre-set is a set without an equality relation. Type of a **pre-set** over a Lean type $a$ lives in a universe of a higher level. Function $A$ is the embedding of objects of type $a$ into pre-sets, i.e. if we want to have a pre-set of `Nat` objects, we need the type `Nat` in Lean and we need a way to represent objects $n : Nat$ as pre-sets:
 ```lean4
 inductive PSet : Type (u + 1)
   | mk (a : Type u) (A : a → PSet) : PSet
+
+def empty_pset : PSet :=
+  PSet.mk Empty (fun x : Empty => nomatch x)
 ```
 
 # ZFC version used in Lean 4: sets as pre-set quotients
-Define extensional equivalence on pre-sets. Define ZFC sets by quotienting pre-sets by extensional equivalence.
+>- Define extensional equivalence on pre-sets
+>- Define ZFC sets by quotienting pre-sets by this equivalence.
+>- Lean's type theory is said to be equiconsistent to ZFC + "there are countably many inaccessible cardinals" (Mario Carneiro)
 
-# ZFC version used in Lean 4: classes
+<!-- # ZFC version used in Lean 4: classes
 Define classes as sets of ZFC sets. Then the rest is usual set theory.
 ```lean4
 def Class :=
   Set ZFSet
-```
+``` -->
 
 
 # Modeling ZFC in Coq
 >- There are a few projects, but no uniform way to work with ZFC in Coq
->- I honestly don't know the details. You define that a ZFC-set is a Type, then define some properties. It is very very subtle
->- In the HoTT book, there is a whole section on ZFC. Requires in-depth HoTT knowledge, so also category theory and algebraic topology.
+>- I honestly don't know the details. You define that a ZFC-set is a Type, then define some properties. Coq has no quotient types by default, unlike Lean. It is very very subtle
+<!-- >- In the HoTT book, there is a whole section on ZFC. Requires in-depth HoTT knowledge, so also category theory and algebraic topology. -->
 
 
 # Theory of Mizar: Tarski-Grothendieck set theory
->- ZFC + Tarski's axiom, which implies existence of inaccessible cardinals
->- enough to define category theory, in contrast to ZFC
 >- Mizar: a Polish theorem prover. In 2009 its mathlib was the biggest body of formalized maths in the world!
 >- the underlying theory of Mizar is precisely first-order logic with Tarski-Grothendieck set theory
->- if you were to formalize that ALL games are determined, Mizar would certainly not be your best assistant: determinacy of all games implies Axiom of Determinacy, which is known to contradict the Axiom of Choice.
+>- ZFC + Tarski's axiom, which implies existence of inaccessible cardinals
+>- enough to define category theory, in contrast to ZFC
+>- if you were to formalize that ALL games are determined, Mizar would certainly not be your best assistant: using the Axiom of Choice, you can construct a not determined winning set! (see end remark)
+
+# A formalization of Borel determinacy in Lean
+>- Sven Manthe published his paper and the complete formalization the proof of Borel determinacy on 5th February 2025.
+>- The formalization has been done in Lean 4.
+>- The project comprises of about 5000 lines of code [here, show specific code]
+>- [...] stronger forms of determinacy,
+like analytic determinacy, are not provable in Lean without additional axioms (unless Lean is inconsistent).
+>- https://www.arxiv.org/pdf/2502.03432
+
+# Remark: Construct non-determined game using Axiom of Choice
+>- Remember: Hamming distance of two binary words is the number of positions they differ at
+>- Using Axiom of Choice, we can construct an infinite XOR function $f: \{0, 1\}^\omega \rightarrow \{0, 1\}$ such that if HammingDistance$(w_1, w_2)=1$, then $f(w_1) \neq f(w_2)$.
+>- Theorem: No player has a winning strategy in an infinite Gale-Stewart game $G_f$ where the winning set $P$ is such that $(a_n) \in P$ iff . Proof: strategy stealing (Niwiński, Kopczyński: A simple indeterminate infinite game, 2012)
+>- https://www.mimuw.edu.pl/~niwinski/Prace/ed.pdf
 
 # Alexander Grothendieck (1928-2014)
 ![alt text](image.png)
->- algebraic geometry
+<!-- >- algebraic geometry
 >- synthesis between geoalg and number theory
 >- synthesis between geoalg and topology
 >- Grothendieck universes
 >- introduced topoi to category theory
->- worked with Teichmuller, whose idea I showed in my last presentation; Grothendieck-Teichmuller group
-
-# Throwback: How can you expect tax-payers to believe in this? (Inter-universal Teichmüller theory)
-![Alt text](intergalactic-theory.png)
+>- worked with Teichmuller, whose idea I showed in my last presentation; Grothendieck-Teichmuller group -->
 
 # Grothendieck, 1970
 ![alt text](image-1.png)
